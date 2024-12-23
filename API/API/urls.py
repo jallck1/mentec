@@ -22,4 +22,5 @@ urlpatterns = [
     path('transacts', views.TransactsView.as_view({'get':'get_all_transacts'})),
     path('transacts/user/<int:id_user>', views.TransactsView.as_view({'get':'get_transacts_user_based'})),
     path('transacts/report', views.TransactsView.as_view({'get':'get_transacts_xlsx'}))
+    
 ]

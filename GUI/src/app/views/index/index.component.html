@@ -1,0 +1,69 @@
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+      <!-- Menú de 3 líneas -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuItems" 
+              aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span> <!-- Icono de 3 líneas -->
+      </button>
+
+      <a class="navbar-brand" routerLink="/views/admin/index">CrediSistem</a>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <!-- Admin View -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 admNavbar" *ngIf="!is_buyer_view">
+              <li class="nav-item" [ngClass]="{'active': activeRoute == 'home-adm'}">
+                  <a class="nav-link" routerLink="/admin/index">Inicio</a>
+              </li>
+              <li class="nav-item" [ngClass]="{'active': activeRoute == 'products-adm'}">
+                  <a class="nav-link" routerLink="/admin/productos">Productos</a>
+              </li>
+              <li class="nav-item" [ngClass]="{'active': activeRoute == 'users-adm'}">
+                  <a class="nav-link" routerLink="/admin/users">Usuarios</a>
+              </li>
+              <li class="nav-item" [ngClass]="{'active': activeRoute == 'transcts-adm'}">
+                  <a class="nav-link" routerLink="/admin/transacts">Transacciones</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" routerLink="/admin/transacts" (click)="downloadRep()">Reporte</a>
+              </li>
+          </ul>
+
+          <!-- Buyer View -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 admNavbar" *ngIf="is_buyer_view">
+              <li class="nav-item" [ngClass]="{'active': activeRoute == 'products-byrs'}">
+                  <a class="nav-link" routerLink="/buyers/productos">Producto F</a>
+              </li>
+              <li class="nav-item" [ngClass]="{'active': activeRoute == 'see-transacts-byr'}">
+                  <a class="nav-link" routerLink="/buyers/transacts">Transacciones</a>
+              </li>
+          </ul>
+      </div>
+  </div>
+</nav>
+
+<!-- Contenido Principal -->
+<div class="main-content">
+  <!-- Cuadro de Publicidad Empresarial (ahora dentro del contenido) -->
+  <div class="advertisement-box">
+      <p>Publicidad Empresarial</p>
+      <button class="btn btn-info">Ver Más</button>
+  </div>
+
+  <!-- Contenido de la página -->
+  <p>Este es el contenido de la página.</p>
+  <p>Asegúrate de que el contenido aquí sea largo suficiente para hacer scroll, para probar el comportamiento del pie de página al final.</p>
+  <p>Este contenido puede ser reemplazado por lo que necesitas en la página.</p>
+</div>
+
+<!-- Información Institucional y otros enlaces -->
+<footer class="footer">
+  <div class="container">
+      <ul class="footer-links">
+          <li><a href="/informacion-institucional">Información Institucional</a></li>
+          <li><a href="/contacto">Contacto</a></li>
+          <li><a href="/pqrs">PQRS</a></li>
+          <li><a href="/terminos-condiciones">Términos y Condiciones</a></li>
+      </ul>
+  </div>
+</footer>

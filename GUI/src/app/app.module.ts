@@ -17,6 +17,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatTooltipModule } from '@angular/material/tooltip'
 import { ImgInputComponent } from './components/img-input/img-input.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { IndexComponent } from './views/index/index.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -29,7 +30,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     BuyProductsComponent,
     ImgInputComponent,
     SeeTransactsByrComponent,
-    TransactsAdminComponent
+    TransactsAdminComponent,
+    IndexComponent
   ],
   imports: [
     BrowserModule,

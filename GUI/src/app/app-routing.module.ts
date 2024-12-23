@@ -8,43 +8,40 @@ import { BuyProductsComponent } from './views/buyers/buy-products/buy-products.c
 import { AuthGuardBuyerService } from './services/auth-guard-buyer.service';
 import { SeeTransactsByrComponent } from './views/buyers/see-transacts-byr/see-transacts-byr.component';
 import { TransactsAdminComponent } from './views/admin/transacts-admin/transacts-admin.component';
+import { IndexComponent } from './views/index/index.component';
 
 const routes: Routes = [
   {
-    path:'',
-    redirectTo:'login',
-    pathMatch:'full'
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
   },
-  // {
-  //   path:'**',
-  //   redirectTo:'admin',
-  //   pathMatch:'full'
-  // },
-
-
   {
-    path:'login',
-    component:LoginComponent
+    path: 'login',
+    component: LoginComponent
   },
-
   {
-    path:'buyers',
-    canActivate:[AuthGuardBuyerService],
-    children:[
-      {path:'', redirectTo:'productos', pathMatch:'full'},
-      {path:'productos', component:BuyProductsComponent},
-      {path:'transacts', component:SeeTransactsByrComponent}
+    path: 'index',
+    component: IndexComponent
+  },
+  {
+    path: 'buyers',
+    canActivate: [AuthGuardBuyerService],
+    children: [
+      {path: '', redirectTo: 'productos', pathMatch: 'full'},
+      {path: 'productos', component: BuyProductsComponent},
+      {path: 'transacts', component: SeeTransactsByrComponent}
     ]
   },
-
   {
-    path:'admin', 
-    canActivate:[AuthGuardAdminService],
+    path: 'admin',
+    canActivate: [AuthGuardAdminService],
     children: [
-      {path:'', redirectTo:'productos', pathMatch:'full'},
-      {path:'productos',component:ProductsAdminComponent},
-      {path:'users',component:UsersAdminComponent},
-      {path:'transacts',component:TransactsAdminComponent}
+      {path: '', redirectTo: 'productos', pathMatch: 'full'},
+      {path: 'productos', component: ProductsAdminComponent},
+      {path: 'users', component: UsersAdminComponent},
+      {path: 'transacts', component: TransactsAdminComponent},
+      {path: 'index', component: IndexComponent },
     ]
   }
 ];

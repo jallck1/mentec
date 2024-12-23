@@ -41,6 +41,8 @@ class Cliente(models.Model):
     correo = models.CharField(max_length=50)
     createdAt = models.DateTimeField(auto_now_add=True)
     image = models.ImageField( upload_to="images/", default="images/nf.jpg")
+    cupos = models.IntegerField()
+    password = models.CharField(max_length=128)
     
     
 class Productos(models.Model):

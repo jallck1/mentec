@@ -10,9 +10,9 @@
         <h3>Clientes</h3>
         <button class="btn btn-primary" matTooltip="Añadir" data-bs-toggle="modal" data-bs-target="#modal-adm"> 
             <span class="material-symbols-outlined">
-                    Añadir
+                add
             </span>
-        </button>    
+        </button>
         
     </header>
     <hr>
@@ -27,6 +27,9 @@
               <p class="card-text"><b>Creado en:</b> {{item.createdAt | date:"dd/MM/yyyy" }}</p>
               <p class="card-text"><b>Telefono:</b> {{item.telefono}}</p>
               <p class="card-text"><b>Correo:</b> {{item.correo }}</p>
+              <p class="card-text"><b>Cupo:</b> {{ item.cupos | currency }}</p>
+              <p class="card-text"><b>Contraseña:</b> {{ item.password }}</p>
+
             </div>
             <div class="btn-section">
                 <button class="btn btn-danger" (click)="deleteUser(item.id)">
@@ -55,6 +58,16 @@
     <div class="input-container">
         <label>Correo</label>
         <input type="text" [(ngModel)]="formData.correo" class="form-control">
+    </div>
+    
+    <div class="input-container">
+    <label>Cupo</label>
+    <input type="text" [(ngModel)]="formData.cupos" class="form-control">
+    </div>
+
+    <div class="input-container">
+        <label>Contraseña</label>
+        <input type="password" [(ngModel)]="formData.password" class="form-control">
     </div>
 
 </app-modal>
