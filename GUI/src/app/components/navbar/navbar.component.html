@@ -27,6 +27,9 @@
   
 		<!-- Buyer View -->
 		<ul class="navbar-nav me-auto mb-2 mb-lg-0 admNavbar" *ngIf="is_buyer_view">
+		  <li class="nav-item" [ngClass]="{'active': activeRoute == 'home-adm'}">
+				<a class="nav-link" routerLink="/buyers/index">Inicio</a>
+		  </li>
 		  <li class="nav-item" [ngClass]="{'active': activeRoute == 'products-byrs'}">
 			<a class="nav-link" routerLink="/buyers/productos">Producto F</a>
 		  </li>
