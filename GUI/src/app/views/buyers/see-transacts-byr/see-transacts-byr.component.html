@@ -16,7 +16,9 @@
             <th>Fecha</th>
             <th>Producto</th>
             <th>Cantidad</th>
+            <th>Estado</th>
             <th>Total</th>
+
         </thead>
         <tbody>
             <tr *ngFor="let transact of transactsData">
@@ -24,6 +26,7 @@
                 <td>{{transact.createdAt}}</td>
                 <td>{{transact.product}}</td>
                 <td>{{transact.quantity}}</td>
+                <td>Aprobado</td>
                 <td>{{transact.total}}</td>
             </tr>
         </tbody>
