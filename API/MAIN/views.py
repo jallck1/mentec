@@ -11,10 +11,10 @@ class ProductsView(viewsets.ModelViewSet):
     queryset = models.Productos.objects.all()
     serializer_class = serializers.ProductSerializer
     
-    def get_all_products(self, request):
-        products = models.Productos.objects.all()
-        serializer = serializers.ProductSerializer(products, many=True)
-        return JsonResponse({'data':serializer.data})  
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return JsonResponse({'data': serializer.data})  
     
     def create_product(self, request):
         serializer = serializers.ProductSerializer(data=request.data)
@@ -24,7 +24,7 @@ class ProductsView(viewsets.ModelViewSet):
     
     def update_product(self, request, id):
         product = get_object_or_404(models.Productos, id=id)
-        serializer = serializers.ProductSerializer(product,data=request.data)
+        serializer = serializers.ProductSerializer(product, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return JsonResponse({}, status=204)
@@ -53,8 +53,8 @@ class UsersView(viewsets.ModelViewSet):
     
     def create_user(self, request):
         group = Group.objects.get(name='Compradores')
-        name = request.data.get('name',None)
-        password = request.data.get('password',None)
+        name = request.data.get('name', None)
+        password = request.data.get('password', None)
         if not name or not password:
             return JsonResponse({'msg':'Deposite bien los datos'}, status=400)
         else:
@@ -63,15 +63,14 @@ class UsersView(viewsets.ModelViewSet):
             user.save()
             user.groups.add(group)
             user.save()
-        return JsonResponse({},status=204)
+        return JsonResponse({}, status=204)
     
-    def desactivate_user(self, request,id):
+    def desactivate_user(self, request, id):
         user = get_object_or_404(models.User, id=id)
         user.is_active = False
         user.save()
         return JsonResponse({}, status=204)
     
-
 
 class ClientView(viewsets.ModelViewSet):
     queryset = models.Cliente.objects.all()
@@ -87,10 +86,9 @@ class ClientView(viewsets.ModelViewSet):
         serializer = serializers.ClientViewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return JsonResponse({'msg':'Creado con exito'}, status=201) 
+        return JsonResponse({'msg':'Creado con éxito'}, status=201) 
     
     def delete_cliente(self, request, id):
-        
         product = get_object_or_404(models.Cliente, id=id)
         product.delete()
         return JsonResponse({}, status=204)
@@ -108,13 +106,13 @@ class TransactsView(viewsets.ModelViewSet):
     def buy_product(self, request, product_id, buyer_id):
         product = get_object_or_404(models.Productos, id=product_id)
         user = get_object_or_404(models.User, id=buyer_id)
-        transact = models.Transacts.objects.create(product=product, buyer=user, quantity=1, total=product.price)
+        transact = models.Transacts.objects.create(product=product, buyer=user, quantity=1, total=product.price, status='Aprobado')
         user.balance -= transact.total
         user.save()
         return JsonResponse({}, status=201)
     
-    def get_transacts_user_based(self, request,id_user):
-        user= get_object_or_404(models.User,id=id_user)
+    def get_transacts_user_based(self, request, id_user):
+        user = get_object_or_404(models.User, id=id_user)
         transacts = models.Transacts.objects.filter(buyer=user)
         serializer = serializers.TransactSerializer(transacts, many=True)
         return JsonResponse({'data':serializer.data})
@@ -133,19 +131,16 @@ class TransactsView(viewsets.ModelViewSet):
             worksheet.cell(row=row, column=4, value=item['createdAt'])
             worksheet.cell(row=row, column=5, value=item['quantity'])
             worksheet.cell(row=row, column=6, value=float(item['total']))
+            worksheet.cell(row=row, column=7, value=item.get('status', 'Pendiente'))
         response = HttpResponse(content_type='application/ms-excel')
         response['Content-Disposition'] = 'attachment; filename="archivo.xlsx"'
         workbook.save(response)
         return response
     
 class ImageView(viewsets.ModelViewSet):
-
     def get_file_img(self, request, image_name):
-        pathFile = os.path.abspath(__file__)
-        path = pathFile.replace(r"MAIN\views.py", "") + r"images" + '\\' + image_name   
-        print(path)
-        if os.path.exists(path=path):
-            return FileResponse(open(path,'rb'),content_type='image/jpeg')
+        path = os.path.join(os.path.dirname(__file__), "images", image_name)
+        if os.path.exists(path):
+            return FileResponse(open(path, 'rb'), content_type='image/jpeg')
         else:
-            print('ruta')
-            return JsonResponse({'error':'No se encuentra la imagen'}, status=404)
+            return JsonResponse({'error': 'No se encuentra la imagen'}, status=404)

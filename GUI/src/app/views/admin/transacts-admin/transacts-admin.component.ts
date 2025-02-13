@@ -57,14 +57,20 @@ export class TransactsAdminComponent implements OnInit {
     this.totalSis = this.calculateTotalTransacts(this.transactsData);
   }
 
-  // **NUEVOS MÉTODOS PARA SOLUCIONAR EL ERROR**
-  handleAccept(transactionId: number) {
-    console.log(`Transacción con ID ${transactionId} aceptada.`);
-    // Aquí puedes agregar la lógica para actualizar el estado en la base de datos.
+  handleAccept(id: number) {
+    const transaction = this.transactsData.find(transact => transact.id === id);
+    if (transaction) {
+      transaction.status = 'Aprobado';
+      this._apiConnect.notifyTransactionUpdate(); // Notificar actualización
+    }
   }
-
-  handleReject(transactionId: number) {
-    console.log(`Transacción con ID ${transactionId} rechazada.`);
-    // Aquí puedes agregar la lógica para actualizar el estado en la base de datos.
+  
+  handleReject(id: number) {
+    const transaction = this.transactsData.find(transact => transact.id === id);
+    if (transaction) {
+      transaction.status = 'Rechazado';
+      this._apiConnect.notifyTransactionUpdate(); // Notificar actualización
+    }
   }
 }
+  
