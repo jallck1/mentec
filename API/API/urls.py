@@ -21,6 +21,6 @@ urlpatterns = [
     path('transacts/<int:product_id>/<int:buyer_id>', views.TransactsView.as_view({'post':'buy_product'})),
     path('transacts', views.TransactsView.as_view({'get':'get_all_transacts'})),
     path('transacts/user/<int:id_user>', views.TransactsView.as_view({'get':'get_transacts_user_based'})),
-    path('transacts/report', views.TransactsView.as_view({'get':'get_transacts_xlsx'}))
-    
+    path('transacts/report', views.TransactsView.as_view({'get':'get_transacts_xlsx'})),
+    path('transacts/status', views.TransactsView.as_view({'get':'get_transacts_status'})),
 ]

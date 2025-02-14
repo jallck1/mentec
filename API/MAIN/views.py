@@ -144,3 +144,22 @@ class ImageView(viewsets.ModelViewSet):
             return FileResponse(open(path, 'rb'), content_type='image/jpeg')
         else:
             return JsonResponse({'error': 'No se encuentra la imagen'}, status=404)
+
+
+class TransactsView(viewsets.ModelViewSet):
+    queryset = models.Transacts.objects.all()
+    serializer_class = serializers.TransactSerializer
+
+    # Método para actualizar el estado de la transacción
+    def update_transact_status(self, request, transact_id):
+        transact = get_object_or_404(models.Transacts, id=transact_id)
+        new_status = request.data.get('status', None)
+
+        # Validamos que el estado sea válido
+        valid_statuses = ['pending', 'accepted', 'rejected']
+        if new_status not in valid_statuses:
+            return JsonResponse({'error': 'Estado inválido'}, status=400)
+
+        transact.status = new_status
+        transact.save()
+        return JsonResponse({'msg': 'Estado actualizado correctamente'}, status=200)
