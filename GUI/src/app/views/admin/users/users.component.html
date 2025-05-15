@@ -1,0 +1,119 @@
+<div class="container mt-4">
+  <h2>Administrar Usuarios</h2>
+
+  <div class="row mt-4">
+    <!-- Formulario de usuarios -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          {{ selectedUser ? 'Editar Usuario' : 'Nuevo Usuario' }}
+        </div>
+        <div class="card-body">
+          <form [formGroup]="userForm" (ngSubmit)="selectedUser ? updateUser() : createUser()">
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" formControlName="name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" formControlName="email" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" class="form-control" formControlName="password" 
+                     [type]="showPassword ? 'text' : 'password'">
+              <div class="form-text">
+                <button type="button" class="btn btn-link p-0" (click)="showPassword = !showPassword">
+                  {{ showPassword ? 'Ocultar' : 'Mostrar' }} contraseña
+                </button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Balance</label>
+              <input type="number" class="form-control" formControlName="balance" required min="0">
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" formControlName="is_admin">
+                <label class="form-check-label">Administrador</label>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" formControlName="is_active">
+                <label class="form-check-label">Activo</label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid">
+              {{ selectedUser ? 'Actualizar' : 'Crear' }}
+            </button>
+            <button type="button" class="btn btn-secondary ms-2" (click)="clearForm()" *ngIf="selectedUser">
+              Cancelar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de usuarios -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <div *ngIf="loading" class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+
+          <div *ngIf="error" class="alert alert-danger">
+            {{ error }}
+          </div>
+
+          <div *ngIf="!loading && !error">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Balance</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Último Login</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of users">
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.balance | currency:'USD' }}</td>
+                    <td>
+                      <span [ngClass]="getUserStatusClass(user)">
+                        {{ getUserRole(user) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span [ngClass]="getUserStatusClass(user)">
+                        {{ user.is_active ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </td>
+                    <td>{{ user.last_login | date:'medium' }}</td>
+                    <td>
+                      <button class="btn btn-primary btn-sm me-1" (click)="selectUser(user)" title="Editar">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-danger btn-sm" (click)="deleteUser(user)" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,20 +1,22 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ProductsAdminComponent } from './views/admin/products-admin/products-admin.component';
-import { UsersAdminComponent } from './views/admin/users-admin/users-admin.component';
-import { LoginComponent } from './views/login/login.component';
-import { AuthGuardAdminService } from './services/auth-guard-admin.service';
-import { BuyProductsComponent } from './views/buyers/buy-products/buy-products.component';
-import { AuthGuardBuyerService } from './services/auth-guard-buyer.service';
-import { SeeTransactsByrComponent } from './views/buyers/see-transacts-byr/see-transacts-byr.component';
-import { TransactsAdminComponent } from './views/admin/transacts-admin/transacts-admin.component';
-import { IndexComponent } from './views/index/index.component';
+import { ProductsComponent } from './views/admin/products/products.component';
+import { UsersComponent } from './views/admin/users/users.component';
+import { LoginComponent } from './components/login/login.component';
+import { AdminGuard } from './guards/admin.guard';
+import { AuthGuard } from './guards/auth.guard';
+import { ProductsComponent as BuyerProductsComponent } from './views/buyer/products/products.component';
+import { TransactsComponent } from './views/admin/transacts/transacts.component';
+import { IndexComponent } from './pages/index/index.component';
+
+import { ProfileComponent } from './views/buyer/profile/profile.component';
+import { TransactsComponent as BuyerTransactsComponent } from './views/buyer/transacts/transacts.component';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
-    pathMatch: 'full'
+    pathMatch: 'full',
+    redirectTo: 'login'
   },
   {
     path: 'login',
@@ -25,25 +27,26 @@ const routes: Routes = [
     component: IndexComponent
   },
   {
-    path: 'buyers',
-    canActivate: [AuthGuardBuyerService],
+    path: 'admin',
+    canActivate: [AdminGuard],
     children: [
-      {path: '', redirectTo: 'productos', pathMatch: 'full'},
-      {path: 'productos', component: BuyProductsComponent},
-      {path: 'transacts', component: SeeTransactsByrComponent}
+      {path: '', redirectTo: 'index', pathMatch: 'full'},
+      {path: 'products', component: ProductsComponent},
+      {path: 'users', component: UsersComponent},
+      {path: 'transacts', component: TransactsComponent}
     ]
   },
   {
-    path: 'admin',
-    canActivate: [AuthGuardAdminService],
+    path: 'buyers',
+    canActivate: [AuthGuard],
     children: [
-      {path: '', redirectTo: 'productos', pathMatch: 'full'},
-      {path: 'productos', component: ProductsAdminComponent},
-      {path: 'users', component: UsersAdminComponent},
-      {path: 'transacts', component: TransactsAdminComponent},
-      {path: 'index', component: IndexComponent },
+      { path: '', redirectTo: 'products', pathMatch: 'full' },
+      { path: 'products', component: BuyerProductsComponent },
+      { path: 'transacts', component: BuyerTransactsComponent },
+      { path: 'profile', component: ProfileComponent }
     ]
-  }
+  },
+  { path: '**', redirectTo: '/login' }
 ];
 
 @NgModule({

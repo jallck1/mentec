@@ -1,0 +1,117 @@
+<div class="container mt-4">
+  <h2>Administrar Productos</h2>
+
+  <div class="row mt-4">
+    <!-- Formulario de productos -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          {{ selectedProduct ? 'Editar Producto' : 'Nuevo Producto' }}
+        </div>
+        <div class="card-body">
+          <form [formGroup]="productForm" (ngSubmit)="selectedProduct ? updateProduct() : createProduct()">
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" formControlName="name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" formControlName="description" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Precio</label>
+              <input type="number" class="form-control" formControlName="price" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Impuestos (%)</label>
+              <input type="number" class="form-control" formControlName="impuestos" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descuento (%)</label>
+              <input type="number" class="form-control" formControlName="descuento" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Stock</label>
+              <input type="number" class="form-control" formControlName="stock" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Imagen (URL)</label>
+              <input type="url" class="form-control" formControlName="image">
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" formControlName="is_active">
+                <label class="form-check-label">Activo</label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
+              {{ selectedProduct ? 'Actualizar' : 'Crear' }}
+            </button>
+            <button type="button" class="btn btn-secondary ms-2" (click)="clearForm()" *ngIf="selectedProduct">
+              Cancelar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de productos -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <div *ngIf="loading" class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+
+          <div *ngIf="error" class="alert alert-danger">
+            {{ error }}
+          </div>
+
+          <div *ngIf="!loading && !error">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Impuestos</th>
+                    <th>Descuento</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let product of products">
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.description }}</td>
+                    <td>{{ product.price | currency:'USD' }}</td>
+                    <td>{{ product.impuestos }}%</td>
+                    <td>{{ product.descuento }}%</td>
+                    <td>{{ product.stock }}</td>
+                    <td>
+                      <span [ngClass]="getProductStatusClass(product)">
+                        {{ product.is_active ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </td>
+                    <td>
+                      <button class="btn btn-primary btn-sm me-1" (click)="selectProduct(product)" title="Editar">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-danger btn-sm" (click)="deleteProduct(product)" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

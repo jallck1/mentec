@@ -1,2 +1,5 @@
-<router-outlet></router-outlet>
-
+<div class="app-container">
+  <app-buyer-navigation *ngIf="isBuyerRoute()"></app-buyer-navigation>
+  <app-admin-navigation *ngIf="isAdminRoute()"></app-admin-navigation>
+  <router-outlet></router-outlet>
+</div>

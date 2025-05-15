@@ -1,0 +1,66 @@
+<div class="container mt-4">
+  <!-- Filtros -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <input type="text" class="form-control" [(ngModel)]="searchTerm" placeholder="Buscar producto...">
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" [(ngModel)]="categoryFilter">
+        <option value="">Todas las categorías</option>
+        <option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" [(ngModel)]="sortOrder">
+        <option value="price_asc">Precio: Menor a Mayor</option>
+        <option value="price_desc">Precio: Mayor a Menor</option>
+        <option value="name_asc">Nombre: A-Z</option>
+        <option value="name_desc">Nombre: Z-A</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Lista de productos -->
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div *ngFor="let product of filteredProducts" class="col">
+      <div class="card h-100">
+        <img [src]="product.image" class="card-img-top" alt="{{ product.name }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p class="card-text text-muted">{{ product.description }}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="h4 mb-0">$ {{ calculateFinalPrice(product) | number:'1.2-2' }}</span>
+              <small class="text-muted">IVA incluido</small>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-outline-primary" (click)="addToCart(product)">
+                <i class="bi bi-cart-plus"></i> Añadir al carrito
+              </button>
+              <button class="btn btn-outline-success" (click)="buyNow(product)">
+                <i class="bi bi-bag-check"></i> Comprar ahora
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <nav aria-label="Pagination" class="mt-4" *ngIf="totalPages > 1">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" (click)="changePage(currentPage - 1)">Anterior</a>
+      </li>
+      <li class="page-item" *ngFor="let page of pageNumbers" [class.active]="currentPage === page">
+        <a class="page-link" (click)="changePage(page)">{{ page }}</a>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" (click)="changePage(currentPage + 1)">Siguiente</a>
+      </li>
+    </ul>
+  </nav>
+</div>

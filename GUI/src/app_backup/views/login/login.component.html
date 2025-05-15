@@ -1,0 +1,40 @@
+<div class="login-container">
+  <div class="login-box">
+    <div class="login-header">
+      <h2>CrediSistem</h2>
+      <p>Iniciar sesión</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Correo electrónico</mat-label>
+        <input matInput type="email" formControlName="email" required>
+        <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          Por favor ingresa un correo electrónico válido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" required>
+        <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          Por favor ingresa tu contraseña
+        </mat-error>
+      </mat-form-field>
+
+      <div class="remember-forgot">
+        <mat-checkbox formControlName="rememberMe">Recordarme</mat-checkbox>
+        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid || loading">
+        <span *ngIf="!loading">Iniciar sesión</span>
+        <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+      </button>
+
+      <div class="register-link">
+        ¿No tienes una cuenta? <a routerLink="/register">Regístrate</a>
+      </div>
+    </form>
+  </div>
+</div>

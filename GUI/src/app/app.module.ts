@@ -1,48 +1,36 @@
-import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import {HttpClientModule} from '@angular/common/http'
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { SharedModule } from './shared/shared.module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ProductsAdminComponent } from './views/admin/products-admin/products-admin.component';
-import { UsersAdminComponent } from './views/admin/users-admin/users-admin.component';
-import { NavbarComponent } from './components/navbar/navbar.component';
-import { PresentTableComponent } from './components/present-table/present-table.component';
-import { ModalComponent } from './components/modal/modal.component';
-import { FormsModule } from '@angular/forms';
-import { LoginComponent } from './views/login/login.component';
-import { BuyProductsComponent } from './views/buyers/buy-products/buy-products.component';
-import { SeeTransactsByrComponent } from './views/buyers/see-transacts-byr/see-transacts-byr.component';
-import { TransactsAdminComponent } from './views/admin/transacts-admin/transacts-admin.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {MatTooltipModule } from '@angular/material/tooltip'
-import { ImgInputComponent } from './components/img-input/img-input.component';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { IndexComponent } from './views/index/index.component';
+import { LoginComponent } from './components/login/login.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CookieService } from 'ngx-cookie-service';
+import { RoleGuard } from './guards/role.guard';
+import { AdminModule } from '@app/views/admin/admin.module';
+import { BuyerModule } from '@app/views/buyer/buyer.module';
+import { RegisterComponent } from './components/register/register.component';
+
 @NgModule({
   declarations: [
     AppComponent,
-    ProductsAdminComponent,
-    UsersAdminComponent,
-    NavbarComponent,
-    PresentTableComponent,
-    ModalComponent,
     LoginComponent,
-    BuyProductsComponent,
-    ImgInputComponent,
-    SeeTransactsByrComponent,
-    TransactsAdminComponent,
-    IndexComponent
+    RegisterComponent
   ],
   imports: [
     BrowserModule,
-    MatSnackBarModule,
-    FormsModule,
     AppRoutingModule,
     HttpClientModule,
-    BrowserAnimationsModule,
-    MatTooltipModule
+    ReactiveFormsModule,
+    SharedModule,
+    CommonModule,
+    FormsModule,
+    AdminModule,
+    BuyerModule
   ],
-  providers: [],
+  providers: [CookieService, RoleGuard],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

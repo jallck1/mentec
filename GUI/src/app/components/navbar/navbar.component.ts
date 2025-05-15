@@ -1,41 +1,46 @@
-import { Component, Input } from '@angular/core';
-import { ApiConnectService } from 'src/app/services/api-connect.service';
-import { DatePipe } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { User } from '../../services/auth.service';
+
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent {
-  @Input() activeRoute:string = ""
-  
-  @Input() is_buyer_view:boolean = false
-  
-  /**
-   *
-   */
-  constructor(private _apiConnect:ApiConnectService) {
-    
+export class NavbarComponent implements OnInit {
+  currentUser: User | null = null;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
   }
 
-  downloadRep() {
-		this._apiConnect.getExcelReport('/transacts/report')
-		.subscribe({
-			next:(response:Blob) => {
-				this.downloadReport(response)
-			}
-		})
-	}
+  ngOnInit(): void {
+    this.currentUser = this.authService.getUser();
+  }
 
-	private downloadReport(data:Blob) {
-		const url:string = window.URL.createObjectURL(data);
-		const anchor:HTMLAnchorElement = document.createElement('a');
-		const actDate:string = new Date().toString()
-    const pipe = new DatePipe('en-US')
-    const actualDate = pipe.transform(actDate, 'dd-MM-yyyy')
-		
-		anchor.href = url;
-		anchor.download = `Reporte de ventas (${actualDate}).xlsx`
-		anchor.click()
-	}	
+  isAdministrator(): boolean {
+    return this.authService.isAdministrator();
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
+
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
+  }
+
+  isUserAuthenticated(): boolean {
+    return this.authService.isAuthenticated();
+  }
+
+  isAdmin(): boolean {
+    return this.authService.getUserRole() === 'admin';
+  }
 }

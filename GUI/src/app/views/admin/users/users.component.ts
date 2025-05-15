@@ -1,0 +1,136 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../../services/auth.service';
+import { User } from '../../../services/auth.service';
+
+@Component({
+  selector: 'app-users',
+  templateUrl: './users.component.html',
+  styleUrls: ['./users.component.css']
+})
+export class UsersComponent implements OnInit {
+  users: User[] = [];
+  loading = true;
+  error = '';
+  selectedUser: User | null = null;
+  userForm: FormGroup;
+
+  showPassword = false;
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService
+  ) {
+    this.userForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.minLength(6)],
+      is_admin: [false],
+      is_active: [true],
+      balance: [0, [Validators.required, Validators.min(0)]]
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    this.loading = true;
+    this.error = '';
+
+    this.authService.getUsers().subscribe(
+      (data: User[]) => {
+        this.users = data;
+        this.loading = false;
+      },
+      (error: any) => {
+        this.error = 'Error al cargar los usuarios';
+        this.loading = false;
+      }
+    );
+  }
+
+  selectUser(user: User): void {
+    this.selectedUser = user;
+    this.userForm.patchValue({
+      name: user.name,
+      email: user.email,
+      is_admin: user.is_admin,
+      is_active: user.is_active,
+      balance: user.balance
+    });
+  }
+
+  createUser(): void {
+    if (this.userForm.invalid) {
+      return;
+    }
+
+    const userData = this.userForm.value;
+    
+    this.authService.createUser(userData).subscribe(
+      (user: User) => {
+        this.users.unshift(user);
+        this.clearForm();
+        alert('Usuario creado exitosamente');
+      },
+      (error: any) => {
+        this.error = 'Error al crear el usuario';
+      }
+    );
+  }
+
+  updateUser(): void {
+    if (!this.selectedUser || this.userForm.invalid) {
+      return;
+    }
+
+    const userData = this.userForm.value;
+    
+    this.authService.updateUser(this.selectedUser.id, userData).subscribe(
+      (user: User) => {
+        const index = this.users.findIndex(u => u.id === user.id);
+        if (index !== -1) {
+          this.users[index] = user;
+        }
+        this.clearForm();
+        alert('Usuario actualizado exitosamente');
+      },
+      (error: any) => {
+        this.error = 'Error al actualizar el usuario';
+      }
+    );
+  }
+
+  deleteUser(user: User): void {
+    const confirm = window.confirm('¿Estás seguro de que deseas eliminar este usuario?');
+    if (!confirm) return;
+
+    this.authService.deleteUser(user.id).subscribe(
+      () => {
+        const index = this.users.findIndex(u => u.id === user.id);
+        if (index !== -1) {
+          this.users.splice(index, 1);
+        }
+        alert('Usuario eliminado exitosamente');
+      },
+      (error: any) => {
+        this.error = 'Error al eliminar el usuario';
+      }
+    );
+  }
+
+  clearForm(): void {
+    this.userForm.reset();
+    this.selectedUser = null;
+  }
+
+  getUserStatusClass(user: User): string {
+    return user.is_active ? 'text-success' : 'text-danger';
+  }
+
+  getUserRole(user: User): string {
+    return user.is_admin ? 'Administrador' : 'Comprador';
+  }
+}

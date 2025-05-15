@@ -1,0 +1,69 @@
+.container {
+  max-width: 1200px;
+}
+
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.text-success {
+  color: #198754 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.form-label {
+  font-weight: 500;
+}
+
+.form-control:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.spinner-border {
+  width: 2rem;
+  height: 2rem;
+}
+
+.alert {
+  margin-bottom: 1rem;
+}
+
+.table th {
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .table-responsive {
+    margin-bottom: 1rem;
+  }
+}

@@ -1,0 +1,52 @@
+.table {
+  margin-bottom: 2rem;
+}
+
+.table th {
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.table td strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.table td small {
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.badge {
+  padding: 0.5em 0.75em;
+  font-size: 0.875rem;
+}
+
+.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+.bg-success {
+  background-color: #28a745 !important;
+}
+
+.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.bg-info {
+  background-color: #17a2b8 !important;
+}
