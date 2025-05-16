@@ -25,10 +25,22 @@ export class UsersComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email, Validators.pattern('^[^\s@]+@[^\s@]+\.[^\s@]+$')]],
       password: ['', [Validators.minLength(6), Validators.maxLength(100)]],
+      is_admin: [false],
       is_staff: [false],
       is_superuser: [false],
       is_active: [true],
       balance: [0, [Validators.required, Validators.min(0), Validators.max(1000000)]]
+    });
+
+    // Watch for changes in is_admin to update is_staff and is_superuser
+    this.userForm.get('is_admin')?.valueChanges.subscribe(isAdmin => {
+      if (isAdmin) {
+        this.userForm.get('is_staff')?.setValue(true);
+        this.userForm.get('is_superuser')?.setValue(true);
+      } else {
+        this.userForm.get('is_staff')?.setValue(false);
+        this.userForm.get('is_superuser')?.setValue(false);
+      }
     });
   }
 
@@ -65,19 +77,12 @@ export class UsersComponent implements OnInit {
     this.userForm.patchValue({
       name: user.name,
       email: user.email,
-      is_staff: user.is_staff,
-      is_superuser: user.is_superuser,
+      is_admin: user.is_staff || user.is_superuser, // Si es staff o superuser, es admin
       is_active: user.is_active,
       balance: user.balance
     });
 
-    // Update role display text
-    this.userForm.get('is_staff')?.valueChanges.subscribe(isStaff => {
-      this.userForm.get('is_superuser')?.setValue(false);
-    });
-    this.userForm.get('is_superuser')?.valueChanges.subscribe(isSuperuser => {
-      this.userForm.get('is_staff')?.setValue(false);
-    });
+    // No necesitamos los valueChanges ya que solo tenemos un campo de rol ahora
   }
 
   createUser(): void {
