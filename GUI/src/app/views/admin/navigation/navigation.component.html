@@ -1,25 +1,40 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Admin Dashboard</a>
+    <a class="navbar-brand" href="#">{{title}}</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
+      <!-- Menú para administradores -->
+      <ul class="navbar-nav" *ngIf="isAdministrator">
         <li class="nav-item">
-          <a routerLink="products" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
-            Productos
-          </a>
+          <a class="nav-link" [routerLink]="['/admin/products']" routerLinkActive="active">Productos</a>
         </li>
         <li class="nav-item">
-          <a routerLink="users" routerLinkActive="active" class="nav-link">
-            Usuarios
-          </a>
+          <a class="nav-link" [routerLink]="['/admin/users']" routerLinkActive="active">Usuarios</a>
         </li>
         <li class="nav-item">
-          <a routerLink="transacts" routerLinkActive="active" class="nav-link">
-            Transacciones
-          </a>
+          <a class="nav-link" [routerLink]="['/admin/transacts']" routerLinkActive="active">Transacciones</a>
+        </li>
+      </ul>
+
+      <!-- Menú para compradores -->
+      <ul class="navbar-nav" *ngIf="isBuyer">
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/buyer/products']" routerLinkActive="active">Productos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/buyer/transacts']" routerLinkActive="active">Transacciones</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/buyer/profile']" routerLinkActive="active">Perfil</a>
+        </li>
+      </ul>
+
+      <!-- Botón de logout -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" (click)="logout()">Cerrar sesión</a>
         </li>
       </ul>
     </div>

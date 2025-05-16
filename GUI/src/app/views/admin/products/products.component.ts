@@ -20,13 +20,13 @@ export class ProductsComponent implements OnInit {
     private productsService: ProductsService
   ) {
     this.productForm = this.fb.group({
-      name: ['', Validators.required],
-      description: ['', Validators.required],
-      price: ['', [Validators.required, Validators.min(0)]],
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      description: ['', [Validators.required, Validators.minLength(5)]],
+      price: ['', [Validators.required, Validators.min(0), Validators.pattern('^[0-9]+(\.[0-9]{1,2})?$')]],
       impuestos: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
       descuento: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
       stock: ['', [Validators.required, Validators.min(0)]],
-      image: [''],
+      image: ['', Validators.pattern('^(http|https)://.*$')],
       is_active: [true]
     });
   }
@@ -40,13 +40,21 @@ export class ProductsComponent implements OnInit {
     this.error = '';
 
     this.productsService.getProducts().subscribe(
-      (data: Product[]) => {
-        this.products = data;
+      (response: any) => {
+        // Asegurarnos de que recibimos un array
+        if (Array.isArray(response)) {
+          this.products = response;
+        } else if (response.results) { // Si viene en formato paginado
+          this.products = response.results;
+        } else {
+          this.products = [];
+        }
         this.loading = false;
       },
       (error: any) => {
-        this.error = 'Error al cargar los productos';
+        this.error = 'Error al cargar los productos: ' + error.message;
         this.loading = false;
+        console.error('Error:', error);
       }
     );
   }

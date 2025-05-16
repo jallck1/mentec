@@ -22,12 +22,12 @@ export class UsersComponent implements OnInit {
     private authService: AuthService
   ) {
     this.userForm = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.minLength(6)],
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email, Validators.pattern('^[^\s@]+@[^\s@]+\.[^\s@]+$')]],
+      password: ['', [Validators.minLength(6), Validators.maxLength(100)]],
       is_admin: [false],
       is_active: [true],
-      balance: [0, [Validators.required, Validators.min(0)]]
+      balance: [0, [Validators.required, Validators.min(0), Validators.max(1000000)]]
     });
   }
 
@@ -40,13 +40,21 @@ export class UsersComponent implements OnInit {
     this.error = '';
 
     this.authService.getUsers().subscribe(
-      (data: User[]) => {
-        this.users = data;
+      (response: any) => {
+        // Asegurarnos de que recibimos un array
+        if (Array.isArray(response)) {
+          this.users = response;
+        } else if (response.results) { // Si viene en formato paginado
+          this.users = response.results;
+        } else {
+          this.users = [];
+        }
         this.loading = false;
       },
       (error: any) => {
-        this.error = 'Error al cargar los usuarios';
+        this.error = 'Error al cargar los usuarios: ' + error.message;
         this.loading = false;
+        console.error('Error:', error);
       }
     );
   }
@@ -67,7 +75,12 @@ export class UsersComponent implements OnInit {
       return;
     }
 
-    const userData = this.userForm.value;
+    const userData = {
+      ...this.userForm.value,
+      is_staff: this.userForm.value.is_admin, // Convertir is_admin a is_staff
+      is_admin: this.userForm.value.is_admin, // Mantener is_admin para el frontend
+      is_superuser: this.userForm.value.is_admin // Mantener consistencia con el backend
+    };
     
     this.authService.createUser(userData).subscribe(
       (user: User) => {
@@ -76,7 +89,8 @@ export class UsersComponent implements OnInit {
         alert('Usuario creado exitosamente');
       },
       (error: any) => {
-        this.error = 'Error al crear el usuario';
+        console.error('Error al crear el usuario:', error);
+        this.error = error.error?.detail || 'Error al crear el usuario';
       }
     );
   }
@@ -86,7 +100,12 @@ export class UsersComponent implements OnInit {
       return;
     }
 
-    const userData = this.userForm.value;
+    const userData = {
+      ...this.userForm.value,
+      is_staff: this.userForm.value.is_admin, // Convertir is_admin a is_staff
+      is_admin: this.userForm.value.is_admin, // Mantener is_admin para el frontend
+      is_superuser: this.userForm.value.is_admin // Mantener consistencia con el backend
+    };
     
     this.authService.updateUser(this.selectedUser.id, userData).subscribe(
       (user: User) => {

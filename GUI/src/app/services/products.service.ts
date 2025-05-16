@@ -40,7 +40,7 @@ export class ProductsService {
 
   private handleError(error: any): Observable<never> {
     console.error('Error en el servicio:', error);
-    return throwError(() => error);
+    return throwError(() => new Error(error.message || 'Error desconocido'));
   }
 
   getProducts(params?: {
@@ -48,7 +48,7 @@ export class ProductsService {
     search?: string;
     category?: string;
     sort?: string;
-  }): Observable<any> {
+  }): Observable<Product[]> {
     const queryParams = new URLSearchParams();
     if (params) {
       if (params.page) queryParams.set('page', params.page.toString());
@@ -57,11 +57,11 @@ export class ProductsService {
       if (params.sort) queryParams.set('sort', params.sort);
     }
 
-    return this.http.get(`${this.apiUrl}/products/`, {
+    return this.http.get<Product[]>(`${this.apiUrl}/products/`, {
       params: queryParams.toString() ? { params: queryParams.toString() } : undefined,
       headers: this.getHeaders()
     }).pipe(
-      catchError(this.handleError)
+      catchError((error: any) => this.handleError(error))
     );
   }
 
