@@ -88,12 +88,23 @@ export class ProductsService {
     );
   }
 
-  createProduct(product: Partial<Product>): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/products/`, product, {
-      headers: this.getHeaders()
-    }).pipe(
+  createProduct(formData: FormData): Observable<Product> {
+    // Obtener el token de autenticación
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      return throwError(() => new Error('No se encontró el token de autenticación'));
+    }
+
+    // Crear headers con el token
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.post<Product>(`${this.apiUrl}/products/`, formData, { headers }).pipe(
       catchError(error => {
         console.error('Error al crear producto:', error);
+        console.error('Detalle del error (backend):', error.error);
         return throwError(() => error);
       })
     );

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductsService } from '../../../services/products.service';
 import { Product } from '../../../services/products.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-products',
@@ -14,21 +15,36 @@ export class ProductsComponent implements OnInit {
   error = '';
   selectedProduct: Product | null = null;
   productForm: FormGroup;
+  selectedImage: File | null = null;
+  selectedImageURL: string | null = null;
 
   constructor(
     private fb: FormBuilder,
-    private productsService: ProductsService
+    private productsService: ProductsService,
+    private authService: AuthService
   ) {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       description: ['', [Validators.required, Validators.minLength(5)]],
-      price: ['', [Validators.required, Validators.min(0), Validators.pattern('^[0-9]+(\.[0-9]{1,2})?$')]],
-      impuestos: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
-      descuento: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
+      price: ['', [Validators.required, Validators.min(0)]],
+      impuestos: [0, [Validators.min(0), Validators.max(100)]],
+      descuento: [0, [Validators.min(0), Validators.max(100)]],
       stock: ['', [Validators.required, Validators.min(0)]],
-      image: ['', Validators.pattern('^(http|https)://.*$')],
+      image: [''],
       is_active: [true]
     });
+  }
+
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.selectedImage = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.selectedImageURL = e.target?.result as string;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
   }
 
   ngOnInit(): void {
@@ -77,18 +93,66 @@ export class ProductsComponent implements OnInit {
       return;
     }
 
+    // Verificar si el usuario está autenticado
+    if (!this.authService.isAuthenticated()) {
+      this.error = 'Debe estar autenticado para crear productos';
+      return;
+    }
+
+    const formData = new FormData();
     const productData = this.productForm.value;
-    
-    this.productsService.createProduct(productData).subscribe(
-      (product: Product) => {
+
+    // Agregar campos del formulario
+    formData.append('name', productData.name);
+    formData.append('description', productData.description || '');
+    formData.append('price', productData.price.toString());
+    formData.append('impuestos', productData.impuestos.toString());
+    formData.append('descuento', productData.descuento.toString());
+    formData.append('stock', productData.stock.toString());
+    formData.append('is_active', productData.is_active.toString());
+
+    // Agregar la imagen si existe
+    if (this.selectedImage) {
+      formData.append('image', this.selectedImage, this.selectedImage.name);
+    }
+
+    // Verificar que al menos hay un campo requerido
+    if (!productData.name || !productData.price || !productData.stock) {
+      this.error = 'Por favor, completa los campos requeridos';
+      return;
+    }
+
+    console.log('Enviando producto:', {
+      name: productData.name,
+      description: productData.description,
+      price: productData.price,
+      impuestos: productData.impuestos,
+      descuento: productData.descuento,
+      stock: productData.stock,
+      is_active: productData.is_active,
+      image: this.selectedImage ? this.selectedImage.name : 'No image'
+    });
+
+    this.productsService.createProduct(formData).subscribe({
+      next: (product: Product) => {
+        console.log('Producto creado:', product);
         this.products.unshift(product);
         this.clearForm();
         alert('Producto creado exitosamente');
       },
-      (error: any) => {
-        this.error = 'Error al crear el producto';
+      error: (error: any) => {
+        console.error('Error al crear producto:', error);
+        console.error('Detalle del error (backend):', error.error);
+        
+        if (error.status === 401) {
+          this.error = 'No tienes permisos para crear productos. Por favor, inicia sesión.';
+        } else if (error.error?.detail) {
+          this.error = error.error.detail;
+        } else {
+          this.error = 'Error al crear el producto. Por favor, verifica los datos.';
+        }
       }
-    );
+    });
   }
 
   updateProduct(): void {
