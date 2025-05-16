@@ -1,24 +1,30 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { environment } from '../../environments/environment';
+import { environment } from 'src/environments/environment';
 
 export interface User {
   id: number;
   email: string;
   name: string;
   balance: number;
-  is_admin: boolean;
   is_active: boolean;
   is_staff: boolean;
   is_superuser: boolean;
-  role: 'admin' | 'buyer';
-  token: string;
-  cupos: number;
-  date_joined: string;
+  access: string;
+  refresh: string;
+  groups: string[];
+  permissions: string[];
   last_login: string | null;
+  date_joined: string | null;
+  cliente?: {
+    telefono: string;
+    correo: string;
+    cupos: number;
+    image?: string;
+  };
 }
 
 @Injectable({
@@ -26,8 +32,16 @@ export interface User {
 })
 export class AuthService {
   private apiUrl = environment.apiUrl;
-  private currentUserSubject: BehaviorSubject<User | null>;
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
 
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    this.loadUserFromStorage();
+  }
+
+  // Getters
   get currentUser$(): Observable<User | null> {
     return this.currentUserSubject.asObservable();
   }
@@ -36,109 +50,110 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  get currentUserValue(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  // Authentication checks
   isAuthenticated(): boolean {
-    const token = localStorage.getItem('token');
+    const token = this.getToken();
     const user = this.currentUserSubject.value;
     return !!token && !!user;
   }
 
+  isBuyer(): boolean {
+    const user = this.currentUserSubject.value;
+    return !!user && !user.is_superuser && !user.is_staff;
+  }
+
   isAdministrator(): boolean {
     const user = this.currentUserSubject.value;
-    return !!user && (user.is_admin || user.is_superuser || user.is_staff);
+    return !!user && (user.is_superuser || user.is_staff);
   }
 
-  // Add a method to refresh the user data
-  refreshUser(): Observable<User | null> {
-    if (!this.isAuthenticated()) {
-      return of(null);
-    }
-
-    const token = localStorage.getItem('token');
-    return this.http.get<User>(`${this.apiUrl}/users/me/`, {
-      headers: this.getHeaders()
-    }).pipe(
-      tap((user: User) => {
-        localStorage.setItem('user', JSON.stringify(user));
-        this.currentUserSubject.next(user);
-      }),
-      catchError(error => {
-        console.error('Error refreshing user:', error);
-        this.logout();
-        return throwError(() => error);
-      })
-    );
-  }
-
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
-    const user = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    
-    if (token && user) {
-      const parsedUser = JSON.parse(user);
-      this.currentUserSubject = new BehaviorSubject<User | null>(parsedUser);
-    } else {
-      this.currentUserSubject = new BehaviorSubject<User | null>(null);
-    }
-
-    // Actualizar el usuario automáticamente si hay token
-    if (token) {
-      this.refreshUser().subscribe();
-    }
-  }
-
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users/`, {
-      headers: this.getHeaders()
+  // Token management
+  private getHeaders(): HttpHeaders {
+    const token = this.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     });
   }
 
-  createUser(userData: Partial<User>): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/users/`, userData, {
-      headers: this.getHeaders()
+  private getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  private getRefreshToken(): string | null {
+    return localStorage.getItem('refresh_token');
+  }
+
+  // User data management
+  private loadUserFromStorage(): void {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      this.currentUserSubject.next(user);
+    }
+  }
+
+  getUserRole(): string {
+    const user = this.currentUserSubject.value;
+    if (!user) {
+      console.error('No user data available');
+      return '';
+    }
+
+    console.log('Checking user role:', {
+      id: user.id,
+      email: user.email,
+      is_staff: user.is_staff,
+      is_superuser: user.is_superuser
     });
+
+    if (user.is_superuser || user.is_staff) {
+      console.log('User is admin');
+      return 'admin';
+    }
+
+    console.log('User is buyer');
+    return 'buyer';
   }
 
-  deleteUser(userId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/users/${userId}/`, {
-      headers: this.getHeaders()
-    });
-  }
-
-  public get currentUserValue(): User | null {
-    return this.currentUserSubject.value;
-  }
-
+  // API Methods
   login(email: string, password: string): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/auth/token/`, {
-      email,
-      password
-    }).pipe(
-      map((response: any) => {
-        console.log('Login response:', response);
+    const credentials = { email, password };
+    return this.http.post<User>(`${this.apiUrl}/auth/token/`, credentials).pipe(
+      tap((response: any) => {
+        // Verificar que la respuesta tenga la estructura esperada
+        if (!response || !response.user) {
+          console.error('Invalid login response:', response);
+          throw new Error('Invalid login response');
+        }
+
         const user = response.user;
-        
-        // Ensure we have all required fields
-        user.id = user.id || response.user_id;
-        user.role = user.role || (user.is_admin || user.is_staff || user.is_superuser ? 'admin' : 'buyer');
-        
-        // Store token and user data
+        console.log('Login successful:', {
+          id: user.id,
+          email: user.email,
+          is_staff: user.is_staff,
+          is_superuser: user.is_superuser
+        });
+
+        // Guardar tokens
         localStorage.setItem('token', response.access);
         localStorage.setItem('refresh_token', response.refresh);
+
+        // Guardar usuario
         localStorage.setItem('user', JSON.stringify(user));
         this.currentUserSubject.next(user);
-        
-        // Start token refresh timer
-        const expiresIn = response.expires_in || 3600;
-        setTimeout(() => this.refreshToken(), expiresIn * 1000 - 300000); // Refresh 5 minutes before expiration
-        
-        return user;
+
+        // Verificar rol
+        const role = this.getUserRole();
+        console.log('User role determined:', role);
       }),
-      catchError(error => {
-        console.error('Error al iniciar sesión:', error);
-        throw error;
+      catchError((error: HttpErrorResponse) => {
+        console.error('Login error:', error.error);
+        return throwError(() => new Error(error.error.detail || 'Login failed'));
       })
     );
   }
@@ -151,27 +166,43 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  getUserId(): number | null {
-    return this.currentUserSubject.value?.id || null;
-  }
 
-  updateUserBalance(userId: number, amount: number): Observable<User> {
-    return this.http.patch<User>(`${this.apiUrl}/users/${userId}/update_balance/`, {
-      amount
-    }, {
+
+
+
+  changePassword(passwordData: {
+    old_password: string;
+    new_password: string;
+  }): Observable<void> {
+    const user = this.currentUserSubject.value;
+    if (!user) {
+      return throwError(() => new Error('No user data'));
+    }
+    return this.http.post<void>(`${this.apiUrl}/auth/change_password/`, passwordData, {
       headers: this.getHeaders()
     });
   }
 
-  public getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    let headers = new HttpHeaders().set('Content-Type', 'application/json');
-    
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-    
-    return headers;
+
+
+
+
+  // User management methods
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/users/`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  createUser(userData: Partial<User>): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/users/`, userData, {
+      headers: this.getHeaders()
+    }).pipe(
+      tap((user: User) => {
+        this.currentUserSubject.next(user);
+        localStorage.setItem('user', JSON.stringify(user));
+      })
+    );
   }
 
   updateUser(userId: number, userData: Partial<User>): Observable<User> {
@@ -185,21 +216,16 @@ export class AuthService {
     );
   }
 
-  changePassword(passwordData: {
-    currentPassword: string;
-    newPassword: string;
-  }): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/auth/change_password/`, passwordData, {
+  deleteUser(userId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/users/${userId}/`, {
       headers: this.getHeaders()
     });
   }
 
-  getUserRole(): 'admin' | 'buyer' | '' {
-    const user = this.getUser();
-    return user?.role || '';
+  getUserId(): number | null {
+    const user = this.currentUserSubject.value;
+    return user ? user.id : null;
   }
-
-
 
   // Refresh token before it expires
   refreshToken(): Observable<any> {
@@ -216,14 +242,7 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/token/refresh/`, {
       refresh: refreshToken
     }).pipe(
-      tap((response: any) => {
-        localStorage.setItem('token', response.access);
-        const currentUser = this.currentUserSubject.value;
-        if (currentUser) {
-          currentUser.token = response.access;
-          this.currentUserSubject.next(currentUser);
-        }
-      }),
+
       catchError(error => {
         this.logout();
         return throwError(() => error);

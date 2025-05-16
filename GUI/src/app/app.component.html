@@ -1,5 +1,10 @@
 <div class="app-container">
-  <app-buyer-navigation *ngIf="isBuyerRoute()"></app-buyer-navigation>
-  <app-admin-navigation *ngIf="isAdminRoute()"></app-admin-navigation>
+  <!-- Header para buyer -->
+  <app-buyer-navigation *ngIf="isBuyerRoute()" class="buyer-header"></app-buyer-navigation>
+  
+  <!-- Header para admin -->
+  <app-admin-navigation *ngIf="isAdminRoute()" class="admin-header"></app-admin-navigation>
+  
+  <!-- Contenido principal -->
   <router-outlet></router-outlet>
 </div>

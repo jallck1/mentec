@@ -7,17 +7,17 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a routerLink="products" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
+          <a [routerLink]="['/buyer/products']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
             Productos
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="transacts" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="['/buyer/transacts']" routerLinkActive="active" class="nav-link">
             Mis Compras
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="profile" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="['/buyer/profile']" routerLinkActive="active" class="nav-link">
             Perfil
           </a>
         </li>

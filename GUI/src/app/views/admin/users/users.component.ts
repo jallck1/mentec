@@ -25,7 +25,8 @@ export class UsersComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email, Validators.pattern('^[^\s@]+@[^\s@]+\.[^\s@]+$')]],
       password: ['', [Validators.minLength(6), Validators.maxLength(100)]],
-      is_admin: [false],
+      is_staff: [false],
+      is_superuser: [false],
       is_active: [true],
       balance: [0, [Validators.required, Validators.min(0), Validators.max(1000000)]]
     });
@@ -64,9 +65,18 @@ export class UsersComponent implements OnInit {
     this.userForm.patchValue({
       name: user.name,
       email: user.email,
-      is_admin: user.is_admin,
+      is_staff: user.is_staff,
+      is_superuser: user.is_superuser,
       is_active: user.is_active,
       balance: user.balance
+    });
+
+    // Update role display text
+    this.userForm.get('is_staff')?.valueChanges.subscribe(isStaff => {
+      this.userForm.get('is_superuser')?.setValue(false);
+    });
+    this.userForm.get('is_superuser')?.valueChanges.subscribe(isSuperuser => {
+      this.userForm.get('is_staff')?.setValue(false);
     });
   }
 
@@ -150,6 +160,6 @@ export class UsersComponent implements OnInit {
   }
 
   getUserRole(user: User): string {
-    return user.is_admin ? 'Administrador' : 'Comprador';
+    return user.is_superuser || user.is_staff ? 'Administrador' : 'Comprador';
   }
 }

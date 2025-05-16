@@ -30,12 +30,11 @@ export class AdminGuard implements CanActivate {
         console.log('AdminGuard: Current user data:', {
           id: user.id,
           email: user.email,
-          role: user.role,
           is_staff: user.is_staff,
           is_superuser: user.is_superuser
         });
 
-        const isAdmin = user.role === 'admin' || user.is_staff || user.is_superuser;
+        const isAdmin = user.is_staff || user.is_superuser;
         if (!isAdmin) {
           console.log('AdminGuard: User is not admin');
           this.router.navigate(['/login']);

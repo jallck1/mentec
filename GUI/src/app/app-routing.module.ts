@@ -5,6 +5,7 @@ import { UsersComponent } from './views/admin/users/users.component';
 import { LoginComponent } from './components/login/login.component';
 import { AdminGuard } from './guards/admin.guard';
 import { AuthGuard } from './guards/auth.guard';
+import { BuyerGuard } from './guards/buyer.guard';
 import { ProductsComponent as BuyerProductsComponent } from './views/buyer/products/products.component';
 import { TransactsComponent } from './views/admin/transacts/transacts.component';
 import { IndexComponent } from './pages/index/index.component';
@@ -37,14 +38,20 @@ const routes: Routes = [
     ]
   },
   {
-    path: 'buyers',
-    canActivate: [AuthGuard],
+    path: 'buyer',
+    canActivate: [BuyerGuard],
     children: [
       { path: '', redirectTo: 'products', pathMatch: 'full' },
       { path: 'products', component: BuyerProductsComponent },
       { path: 'transacts', component: BuyerTransactsComponent },
       { path: 'profile', component: ProfileComponent }
     ]
+  },
+
+  // Add a redirect from old 'buyers' path to new 'buyer' path
+  {
+    path: 'buyers',
+    redirectTo: 'buyer'
   },
   { path: '**', redirectTo: '/login' }
 ];

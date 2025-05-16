@@ -3,6 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '@app/shared/shared.module';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [
+  { path: '', redirectTo: 'products', pathMatch: 'full' },
+  { path: 'products', component: ProductsComponent },
+  { path: 'transacts', component: TransactsComponent },
+  { path: 'profile', component: ProfileComponent }
+];
 
 import { ProductsComponent } from './products/products.component';
 import { TransactsComponent } from './transacts/transacts.component';
@@ -20,7 +28,8 @@ import { ProfileComponent } from './profile/profile.component';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    SharedModule
+    SharedModule,
+    RouterModule.forChild(routes)
   ],
   providers: [
     CurrencyPipe,

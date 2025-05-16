@@ -52,18 +52,32 @@ export class LoginComponent implements OnInit {
     console.log('Attempting login with:', { email, password: '*****' });
 
     this.authService.login(email, password).subscribe({
-      next: (user: any) => {
-        console.log('Login successful:', user);
-        this.loading = false;
+      next: (response: any) => {
+        console.log('Login response:', response);
         
-        if (user) {
-          console.log('User data received:', user);
+        if (response && response.user) {
+          const user = response.user;
+          console.log('User data from backend:', {
+            id: user.id,
+            email: user.email,
+            is_staff: user.is_staff,
+            is_superuser: user.is_superuser,
+            is_active: user.is_active
+          });
+          
+          // Store user data in localStorage
+          localStorage.setItem('user', JSON.stringify(user));
+          
+          // Get user role
           const role = this.authService.getUserRole();
-          console.log('User role:', role);
+          console.log('User role determined:', role);
+          
+          // Debug navigation
+          console.log('Starting navigation...');
           
           // Redirect based on role
           if (role === 'admin') {
-            console.log('Redirecting to admin dashboard');
+            console.log('User is admin, redirecting to admin dashboard');
             this.router.navigate(['/admin']).then(success => {
               console.log('Admin navigation result:', success);
               if (!success) {
@@ -71,7 +85,7 @@ export class LoginComponent implements OnInit {
               }
             });
           } else if (role === 'buyer') {
-            console.log('Redirecting to buyer dashboard');
+            console.log('User is buyer, redirecting to buyer dashboard');
             this.router.navigate(['/buyers']).then(success => {
               console.log('Buyer navigation result:', success);
               if (!success) {
@@ -82,17 +96,11 @@ export class LoginComponent implements OnInit {
             console.error('Unknown role:', role);
             this.router.navigate(['/login']);
           }
-          
-          // Refresh user data after successful login
-          this.authService.refreshUser().subscribe({
-            next: (refreshedUser) => {
-              console.log('User data refreshed:', refreshedUser);
-            },
-            error: (error) => {
-              console.error('Error refreshing user data:', error);
-            }
-          });
+        } else {
+          console.error('Invalid login response:', response);
+          this.errorMessage = 'Error al procesar la respuesta del servidor';
         }
+        this.loading = false;
       },
       error: (error: any) => {
         console.error('Login error:', error);
